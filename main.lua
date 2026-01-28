@@ -5,9 +5,8 @@ local Game     = require("engine.game")
 local Terminal = require("engine.terminal")
 local Time     = require("engine.time")
 
-local frames = 0
-
 Terminal.enable_raw()
+Terminal.enter()
 
 local last_time = Time.now()
 
@@ -22,12 +21,9 @@ while State.running do
   end
 
   Render.draw(State)
-
   os.execute("sleep 0.03")
-  frames = frames + 1
 end
 
+Terminal.exit()
 Terminal.disable_raw()
 print("Game over.")
-
-

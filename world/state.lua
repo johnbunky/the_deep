@@ -2,16 +2,18 @@ local State = {
   running = true,
 
   player = {
-    x = 5,
-    y = 5,
-    prev_x = 5,
-    prev_y = 5,
-    hp = 10
+    x = 0.0,
+    y = 0.0
   },
 
-  map = {
-    width = 10,
-    height = 10
+  camera = {
+    x = 0.0,
+    y = 0.0
+  },
+
+  screen = {
+    width = 61,
+    height = 31
   }
 }
 
