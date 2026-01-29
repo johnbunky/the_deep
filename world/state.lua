@@ -3,7 +3,9 @@ local State = {
 
   player = {
     x = 0.0,
-    y = 0.0
+    y = 0.0,
+    vx = 0.0,  -- velocity x
+    vy = 0.0   -- velocity y
   },
 
   camera = {
