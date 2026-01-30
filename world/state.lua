@@ -4,14 +4,20 @@ local State = {
   player = {
     x = 0.0,
     y = 0.0,
-    vx = 0.0,  -- velocity x
-    vy = 0.0   -- velocity y
+    z = 0.0,
+    vx = 0.0,   -- velocity x
+    vy = 0.0,   -- velocity y
+    vz = 0.0    -- velocity z
   },
 
   camera = {
     x = 0.0,
-    y = 0.0
+    y = 0.0,
+    z = 0.0 
   },
+  
+  trail = {},       -- motion trail points
+  max_trail = 12,   -- length of trail
 
   screen = {
     width = 61,
