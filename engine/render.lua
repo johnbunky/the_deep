@@ -1,7 +1,8 @@
 local Render = {}
+local Terrain = require("world.terrain")
 
 function Render.clear()
- io.write("\27[2J\27[H") 
+  io.write("\27[H")  -- move cursor to top-left only
 end 
 
 function Render.draw(state) 
@@ -14,26 +15,38 @@ function Render.draw(state)
 
   local camx = state.camera.x 
   local camy = state.camera.y 
+  local camz = state.camera.z
 
-  for sy = 1, sh do 
-    for sx = 1, sw do 
-      if sx == cx and sy == cy then 
-        io.write("@") 
-      else 
+  -- BUILD FRAME IN MEMORY (no printing yet!)
+  local frame_buffer = {}  -- array of strings (one per line)
+
+  for sy = 1, sh do
+    local line = "" -- build each line as a string
+
+    for sx = 1, sw do
+      if sx == cx and sy == cy then
+        line = line .. "@" -- concatenate to string
+      else
         local wx = camx + (sx - cx) 
         local wy = camy + (sy - cy)
-        io.write(" ")
-      end 
-    end 
-    io.write("\n") 
-  end 
+        local point = Terrain.sample_world(wy, wx)
+        line = line .. (point or " ") -- concatenate to string
+      end
+    end
 
-  io.write(string.format(
+    frame_buffer[sy] = line --store complete line
+  end
+
+  local status  = string.format(
     "\nPos: x=%.2f y=%.2f z=%.2f\n",
     state.player.x,
     state.player.y,
     state.player.z
-  )) 
+  )
+
+  -- PRINT ENTIRE FRAME AT ONCE (single io.write call)
+  io.write(table.concat(frame_buffer, "\n") .. status)
+  io.flush()  -- force immediate output
 end 
 
 return Render

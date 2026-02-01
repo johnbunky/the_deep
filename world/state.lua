@@ -15,9 +15,6 @@ local State = {
     y = 0.0,
     z = 0.0 
   },
-  
-  trail = {},       -- motion trail points
-  max_trail = 12,   -- length of trail
 
   screen = {
     width = 61,
