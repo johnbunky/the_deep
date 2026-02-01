@@ -27,9 +27,10 @@ function Render.draw(state)
       if sx == cx and sy == cy then
         line = line .. "@" -- concatenate to string
       else
-        local wx = camx + (sx - cx) 
-        local wy = camy + (sy - cy)
-        local point = Terrain.sample_world(wy, wx)
+        -- Calculate screen offset from center
+        local screen_x = sx - cx
+        local screen_y = sy - cy
+        local point = Terrain.sample_parallax(screen_x, screen_y, camx, camy, camz)
         line = line .. (point or " ") -- concatenate to string
       end
     end
