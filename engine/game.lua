@@ -20,12 +20,13 @@ function Game.update(state, keys, dt)
   if keys["i"] then dz = dz + 1 end
   if keys["o"] then dz = dz - 1 end 
 
-  -- normalize diagonal input 
-  if dx ~= 0 and dy ~= 0 and dz ~= 0 then
-     dx = dx * 0.7071 
-     dy = dy * 0.7071 
-     dz = dz * 0.7071
-  end 
+  -- normalize diagonal input (for 3D)
+  local input_mag = math.sqrt(dx*dx + dy*dy + dz*dz)
+  if input_mag > 0 then
+    dx = dx / input_mag
+    dy = dy / input_mag
+    dz = dz / input_mag
+  end
 
   -- apply acceleration 
   state.player.vx = state.player.vx + dx * ACCELERATION
@@ -38,7 +39,7 @@ function Game.update(state, keys, dt)
   state.player.vz = state.player.vz * FRICTION 
 
   -- clamp to max speed 
-  local speed = math.sqrt(state.player.vx^2 + state.player.vy^2) 
+  local speed = math.sqrt(state.player.vx^2 + state.player.vy^2 + state.player.vz^2) 
   if speed > MAX_SPEED then 
       state.player.vx = state.player.vx * (MAX_SPEED / speed)
       state.player.vy = state.player.vy * (MAX_SPEED / speed) 
@@ -64,6 +65,7 @@ function Game.update(state, keys, dt)
   -- camera follows player (centered) 
   state.camera.x = state.player.x 
   state.camera.y = state.player.y 
+  state.camera.z = state.player.z 
 end 
 
 return Game

@@ -30,7 +30,7 @@ function Render.draw(state)
         -- Calculate screen offset from center
         local screen_x = sx - cx
         local screen_y = sy - cy
-        local point = Terrain.sample_parallax(screen_x, screen_y, camx, camy, camz)
+        local point = Terrain.sample_space(screen_x, screen_y, camx, camy, camz)
         line = line .. (point or " ") -- concatenate to string
       end
     end
@@ -38,12 +38,32 @@ function Render.draw(state)
     frame_buffer[sy] = line --store complete line
   end
 
-  local status  = string.format(
-    "\nPos: x=%.2f y=%.2f z=%.2f\n",
+  local speed = math.sqrt(
+    state.player.vx^2 + state.player.vy^2 + state.player.vz^2
+  )
+  
+  -- DEBUG: Show depth info for each layer
+  local debug_layers = ""
+  for i, layer in ipairs(Terrain.layers) do
+    local dz = layer.z - camz
+    debug_layers = debug_layers .. string.format("L%d: dz=%.1f ", i, dz)
+  end
+  
+  local status = string.format(
+    "\nPos: x=%.2f y=%.2f z=%.2f | Speed: %.2f\n%s\n[HJKL=XY, IO=Z, Q=quit]",
     state.player.x,
     state.player.y,
-    state.player.z
+    state.player.z,
+    speed,
+    debug_layers
   )
+  
+  -- local status  = string.format(
+  --   "\nPos: x=%.2f y=%.2f z=%.2f\n",
+  --   state.player.x,
+  --   state.player.y,
+  --   state.player.z
+  -- )
 
   -- PRINT ENTIRE FRAME AT ONCE (single io.write call)
   io.write(table.concat(frame_buffer, "\n") .. status)
