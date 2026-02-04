@@ -35,7 +35,6 @@ function Terrain.sample_blobs(x, y)
 end
  
 -- Stable hash per coordinate
--- Stable hash per coordinate
 local function hash(x, y, z)
   x = math.floor(x)
   y = math.floor(y)
@@ -74,33 +73,57 @@ function Terrain.sample_parallax(screen_x, screen_y, camx, camy, camz)
   return nil
 end
 
-Terrain.layers1 = {
-  { z = -5,  parallax = 1.0, density = 0.9997, char = "✦", fov = 10 },   -- low fov = less perspective
-  -- { z = -20, parallax = 0.6, density = 0.999,  char = "o",  fov = 30 },
-  { z = -60, parallax = 0.3, density = 0.998,  char = ".",  fov = 50 },  -- high fov = more perspective
+Terrain.layer_spacing = 12    -- distance between depth layers
+Terrain.layer_count   = 4     -- how many layers to render
+Terrain.layer_template = {
+  density = 0.9995,
+  fov = 50,
 }
 
-function Terrain.sample_space1(screen_x, screen_y, camx, camy, camz)
-  for _, layer in ipairs(Terrain.layers1) do
-    local dz = layer.z - camz
+function Terrain.sample_space(screen_x, screen_y, camx, camy, camz)
+  local spacing = Terrain.layer_spacing
+  local count   = Terrain.layer_count
+  
+  -- Snap to nearest layer grid
+  local base_z  = math.floor(camz / spacing) * spacing
+  
+  for i = 1, count do
+    -- Generate layers in front of camera
+    local layer_z = base_z - i * spacing
+    local dz = layer_z - camz
     
-    if dz < -1 then
-      local perspective_scale = layer.fov / (-dz)
+    if dz < -1 and dz > -200 then
+      local abs_dz = -dz
+      local clamped_dz = math.max(5, abs_dz)
       
-      local px = screen_x * perspective_scale
-      local py = screen_y * perspective_scale
+      local perspective_scale = Terrain.layer_template.fov / clamped_dz
+
+      local parallax = 0.3 + (abs_dz / 100) * 0.7  -- 0.3 to 1.0 based on depth
+
+      local px = screen_x * perspective_scale * parallax
+      local py = screen_y * perspective_scale * parallax
       
       local wx = camx + px
       local wy = camy + py
       
-      local r = hash(
-        math.floor(wx),
-        math.floor(wy),
-        layer.z
-      )
+      local hash_x = math.floor(wx)
+      local hash_y = math.floor(wy)
       
-      if r > layer.density then
-        return layer.char
+      -- Use layer_z directly (no stable_z needed - it's already repeating!)
+      local r = hash(hash_x, hash_y, layer_z)
+      
+      if r > Terrain.layer_template.density then
+        -- Dynamic character based on distance
+        local char
+        if abs_dz < 20 then
+          char = "."  -- Close stars
+        elseif abs_dz < 50 then
+          char = "o"  -- Medium stars
+        else
+          char = "✦"  -- Far stars
+        end
+        
+        return char
       end
     end
   end
@@ -108,38 +131,25 @@ function Terrain.sample_space1(screen_x, screen_y, camx, camy, camz)
   return nil
 end
 
-
-function Terrain.sample_space(screen_x, screen_y, camx, camy, camz)
-  for _, layer in ipairs(Terrain.layers1) do
-    local dz = layer.z - camz
-    
-    -- FIX 1: Expanded render range (was dz < -1, now much wider)
-    if dz < -1 and dz > -200 then
-      -- FIX 2: Clamp perspective to prevent extreme values
-      local abs_dz = -dz
-      local clamped_dz = math.max(3, abs_dz)  -- Never let it get too small
-      
-      local perspective_scale = layer.fov / clamped_dz
-      
-      local px = screen_x * perspective_scale
-      local py = screen_y * perspective_scale
-      
-      local wx = camx + px
-      local wy = camy + py
-      
-      -- FIX 3: Stabilize hashing with sub-pixel offset
-      local hash_x = math.floor(wx + 0.5)  -- Round instead of floor
-      local hash_y = math.floor(wy + 0.5)
-      
-      local r = hash(hash_x, hash_y, layer.z)
-      
-      if r > layer.density then
-        return layer.char
-      end
+-- Debug helper
+function Terrain.get_debug_info(camz)
+  local spacing = Terrain.layer_spacing
+  local base_z = math.floor(camz / spacing) * spacing
+  local cycle = math.floor(camz / spacing)
+  
+  local info = string.format("camz=%.1f base=%.0f cycle=%d | Layers: ", camz, base_z, cycle)
+  
+  -- Show first few visible layers
+  for i = 1, math.min(5, Terrain.layer_count) do
+    local layer_z = base_z - i * spacing
+    local dz = layer_z - camz
+    if dz < -1 and dz > -50 then
+      local char = (-dz < 15) and "✦" or "."
+      info = info .. string.format("[%s@%.0f dz=%.1f] ", char, layer_z, dz)
     end
   end
   
-  return nil
+  return info
 end
 
 return Terrain

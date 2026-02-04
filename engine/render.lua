@@ -43,28 +43,32 @@ function Render.draw(state)
   )
   
   -- DEBUG: Show depth info for each layer
-  local debug_layers = ""
-  for i, layer in ipairs(Terrain.layers) do
-    local dz = layer.z - camz
-    debug_layers = debug_layers .. string.format("L%d: dz=%.1f ", i, dz)
-  end
-  
-  local status = string.format(
-    "\nPos: x=%.2f y=%.2f z=%.2f | Speed: %.2f\n%s\n[HJKL=XY, IO=Z, Q=quit]",
-    state.player.x,
-    state.player.y,
-    state.player.z,
-    speed,
-    debug_layers
-  )
-  
+  -- local debug_layers = ""
+  -- for i, layer in ipairs(Terrain.layers) do
+  --   local dz = layer.z - camz
+  --   debug_layers = debug_layers .. string.format("L%d: dz=%.1f ", i, dz)
+  -- end
+  --
+  --   -- Get debug info from Terrain
+  --
   -- local status  = string.format(
   --   "\nPos: x=%.2f y=%.2f z=%.2f\n",
   --   state.player.x,
   --   state.player.y,
   --   state.player.z
   -- )
-
+   
+  -- Get debug info from Terrain
+  local debug_layers = Terrain.get_debug_info(camz)
+  
+  local status = string.format(
+    "\nPos: x=%.2f y=%.2f z=%.2f | Speed: %.2f\n%s",
+    state.player.x,
+    state.player.y,
+    state.player.z,
+    speed,
+    debug_layers
+  )
   -- PRINT ENTIRE FRAME AT ONCE (single io.write call)
   io.write(table.concat(frame_buffer, "\n") .. status)
   io.flush()  -- force immediate output

@@ -1,8 +1,8 @@
 local Game = {} 
 
-local ACCELERATION = 0.05 -- how fast you accelerate 
-local MAX_SPEED = 1.1 -- maximum velocity 
-local FRICTION = 0.92 -- deceleration (0.9 = more slide, 0.95 = less slide) 
+local ACCELERATION = 0.07 -- how fast you accelerate 
+local MAX_SPEED = 2.5 -- maximum velocity 
+local FRICTION = 0.91 -- deceleration (0.9 = more slide, 0.95 = less slide) 
 
 
 function Game.update(state, keys, dt)
